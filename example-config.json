@@ -1,0 +1,38 @@
+{
+    "_COMMENT": "***   EXAMPLE   EXAMPLE   EXAMPLE     ***",
+    "_COMMENT": "Configuration info for DATA-QUEUE services",
+    "dirs": {
+        "log_dir": "/var/log/tada/",
+        "run_dir": "/var/run/tada/",
+        "_COMMENT.config_dir": "/etc/tada"
+    },
+    "queues": {
+        "transfer": {
+            "_DESCRIPTION": "Files to move from Mountain to Valley.",
+            "type": "MOUNTAIN",
+            "action_name": "network_move",
+            "maximum_errors_per_record": 0,
+            "seconds_between_retry": 1,
+            "maxium_queue_size": 11000,
+            "dq_host": "mountain.tada.org",      "_COMMENT": "Change this!!!",
+            "dq_port": 9999,                     "_COMMENT": "Change this!!!",
+            "dqlevel": "DEBUG",
+            "_COMMENT": "type specific fields follow",
+            "next_queue": "submit",
+            "_END": "dummy"
+        },
+        "submit": {
+            "_DESCRIPTION": "Files to submit for saving.",
+            "type": "VALLEY",
+            "action_name": "submit",
+            "maximum_errors_per_record": 0, 
+            "seconds_between_retry": 1,
+            "maxium_queue_size": 11000,
+            "dq_host": "valley.tada.org",        "_COMMENT": "Change this!!!",
+            "dq_port": 9999,                     "_COMMENT": "Change this!!!",
+            "dqlevel": "DEBUG",
+            "_END": "dummy"
+        }
+    }
+}
+

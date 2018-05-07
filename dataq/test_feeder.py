@@ -90,7 +90,7 @@ def main():
 
 
     #!dummy_client(args.host, args.port)
-    feed_file(args.infile, args.host, args.port)
+    return(feed_file(args.infile, args.host, args.port))
 
 if __name__ == '__main__':
     main()

@@ -151,7 +151,7 @@ def clear_trans(pl, red=None):
     
 ##############################################################################
 
-def push_records(host, port, records, max_qsize):
+def push_records(host, port, records, max_qsize=11000):
     'records :: list(dict(filename, checksum))'
     r = redis.StrictRedis(host=host, port=port,
                           socket_keepalive=True,
@@ -172,8 +172,8 @@ def push_records(host, port, records, max_qsize):
     for rec in records:
         checksum = rec['checksum']
         if r.sismember(aqs, checksum) == 1:
-            logging.warning(': Record for {} is already in queue.'
-                            +' Ignoring duplicate.'.format(checksum))
+            logging.warning((': Record for {} is already in queue.'
+                            ' Ignoring duplicate.').format(checksum))
             continue
         # buffer all commands done by pipeline, make command list atomic
         with r.pipeline() as pl:
@@ -198,7 +198,8 @@ def push_records(host, port, records, max_qsize):
         # END: with pipeline
         log_rid(r, checksum, 'end push_records()')
     
-def push_direct(redis_host, redis_port, fname, checksum, cfg):
+def push_direct(redis_host, redis_port, fname, checksum,
+                max_qsize=11000):
     'Directly push a record to (possibly remote) REDIS'
 
     r = redis.StrictRedis(host=redis_host, port=redis_port,
@@ -213,7 +214,7 @@ def push_direct(redis_host, redis_port, fname, checksum, cfg):
                         .format(checksum))
         return False
 
-    if r.llen(aq) > cfg['maxium_queue_size']:
+    if r.llen(aq) > max_qsize:
         logging.error('Queue is full! '
                       + 'Turning off read from socket. '
                       + 'Disabling push to queue.  '

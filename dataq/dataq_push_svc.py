@@ -17,7 +17,8 @@ import warnings
 
 import redis
 
-from tada import config
+#!from tada import config
+from . import config
 from . import dqutils
 from .dbvars import *
 

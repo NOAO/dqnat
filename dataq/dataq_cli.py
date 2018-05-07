@@ -13,33 +13,19 @@ import pprint
 import json
 import fileinput
 from functools import partial
+from pprint import pformat
 
-from tada import config
+#!from tada import config
+from . import config
 from . import dqutils
 from . import red_utils as ru
 from .dbvars import *
 from .loggingCfg import *
 
-#! dq_logger = logging.getLogger('dataq.cli')
-
     
 def clear_db(red):
     'Delete queue related data from DB'
     logging.info('Resetting everything related to data queue in redis DB.')
-    #!ids = red.smembers(rids)
-    #!id_cnt = len(ids)
-    #!with red.pipeline() as pl:
-    #!    pl.watch(rids,aq,aqs,iq,iqs,*ids)
-    #!    pl.multi()
-    #!    if id_cnt > 0:
-    #!        pl.hdel(ecnt,*ids) # clear error counts
-    #!        pl.delete(*ids)
-    #!    pl.delete(aq,aqs,iq,iqs,rids)
-    #!    if pl.get(actionP) == None:
-    #!        pl.set(actionP,'on')
-    #!    if pl.get(readP) == None:
-    #!        pl.set(readP,'on')
-    #!    pl.execute()
     red.transaction(partial(ru.clear_trans, red=red))
 
 def info(red):
@@ -99,48 +85,17 @@ def dump_queue(red, outfile):
               flush=True
           )
 
-
-
 def push_queue(redis_host, redis_port, infiles, max_qsize):
     recs = list()
     with fileinput.input(files=infiles) as infile:
         for line in infile:
             (checksum, fname, *others) = line.strip().split()
             count = 0 if len(others) == 0 else int(others[0])
-            recs.append(dict(filename=fname, checksum=checksum, error_count=count))
+            recs.append(dict(filename=fname,
+                             checksum=checksum,
+                             error_count=count))
     ru.push_records(redis_host, redis_port, recs, max_qsize)
     
-def OLD_push_queue(red, infiles):
-    'OBSOLETE: Push records (lines) from list of files. (or stdin if infiles is empty).'
-    logging.error('dbg-0: EXECUTING push_queue()')
-    warnings = 0
-    loaded = 0
-
-    with fileinput.input(files=infiles) as infile:
-        for line in infile:
-            (checksum, fname, *others) = line.strip().split()
-            count = 0 if len(others) == 0 else int(others[0])
-            rec = dict(filename=fname, checksum=checksum, error_count=count)
-
-            pl = red.pipeline()
-            pl.watch(rids, aq, aqs, checksum)
-            pl.multi()
-            logging.debug(': Read line with id=%s', checksum)
-            if red.sismember(aqs, checksum) == 1:
-                logging.warning(': Record for %s is already in queue.'
-                                  +' Ignoring duplicate.', checksum)
-                warnings += 1
-            else:
-                logging.debug('push_queue::hmset {} = {}'.format(checksum, rec))
-                # add to DB
-                pl.sadd(aqs, checksum)
-                pl.lpush(aq, checksum)
-                pl.sadd(rids, checksum)
-                pl.hmset(checksum, rec)
-                pl.save()
-                loaded += 1
-                pl.execute()
-        print('PUSH: Issued %d warnings. %d loaded'%(warnings, loaded))
 
 def push_string(red, line):
     'Push record (string) containing: "checksum filename"'
@@ -220,9 +175,10 @@ def deactivate_range(red, first, last):
         logging.debug('Selected records = %s', selected)
     except:
         logging.error('Could not select [{}:{}] from {}.'
-                        .format(first, last, ids))
+                      .format(first, last, ids))
         raise
 
+    warnings = 0
     for rid in selected:
         if red.sismember(iqs, rid) == 1:
             logging.warning(': Record for %s is already in inactive queue.'
@@ -300,12 +256,6 @@ def main():
         description='Modify or display the data queue',
         epilog='EXAMPLE: %(prog)s --summary'
     )
-    #!parser.add_argument('--cfg',
-    #!                    help='Configuration file',
-    #!                    type=argparse.FileType('r'))
-    #!parser.add_argument('--queue', '-q',
-    #!                    choices=possible_qnames,
-    #!                    help='Name of queue to pop from. Must be in cfg file.')
     parser.add_argument('--queue', '-q',
                         default='submit',
                         choices=possible_qnames,
@@ -372,26 +322,21 @@ def main():
         logging.config.dictConfig(LOG_SETTINGS)
 
 
-
-    #!logging.basicConfig(level = numeric_level,
-    #!                    format='%(levelname)s %(message)s',
-    #!                    datefmt='%m-%d %H:%M',
-    #!                    )
-    #!logfilename='/var/log/dataq.log'
-    #!handler = logging.handlers.RotatingFileHandler(logfilename,
-    #!                                               maxBytes=1e4,
-    #!                                               backupCount=9,
-    #!                                               )
-    #!logging.addHandler(handler)
     logging.debug('Debug output is enabled!!')
 
     ############################################################################
 
-    qcfg, dirs = config.get_config(possible_qnames)
+    #!qcfg, dirs = config.get_config(possible_qnames)
+
+    qcfg = config.get_config()
     qname = args.queue
-    max_qsize = qcfg[qname]['maxium_queue_size']
-    host = qcfg[qname]['dq_host']
-    port = qcfg[qname]['redis_port']
+    print('qcfg=',pformat(qcfg))
+    #!max_qsize = qcfg.get('maximum_queue_size',11000)
+    #!host = qcfg['dq_host']
+    #!port = qcfg['redis_port']
+    max_qsize = qcfg['queues'][qname]['maximum_queue_size']
+    host = qcfg['queues'][qname]['dq_host']
+    port = qcfg['queues'][qname]['dq_port']
 
     if len(sys.argv) == 1:
         parser.print_help()

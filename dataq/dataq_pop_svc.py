@@ -17,19 +17,25 @@ import sys
 import traceback
 import yaml
 
-from tada import config
+#!from tada import config
+from . import config
 from . import dqutils as du
 from . import red_utils as ru
 from .dbvars import *
 from .actions import *
 
 # GROSS: highly nested code!!!
-def process_queue_forever(qname, qcfg, dirs, delay=1.0):
+#!def process_queue_forever(qname, qcfg, dirs, delay=1.0):
+def process_queue_forever(qname, qcfg, delay=1.0):
     'Block waiting for items on queue, then process, repeat.'
     red = ru.redis_protocol()
-    action_name = qcfg[qname]['action_name']
+    #!action_name = qcfg[qname]['action_name']
+    #!action = action_lut[action_name]
+    #!maxerrors = qcfg[qname]['maximum_errors_per_record']
+    action_name = qcfg['queues'][qname]['action_name']
     action = action_lut[action_name]
-    maxerrors = qcfg[qname]['maximum_errors_per_record']
+    maxerrors = qcfg['queues'][qname]['maximum_errors_per_record']
+
 
     logging.debug('Read Queue "{}"'.format(qname))
     while True: # pop from queue forever
@@ -59,7 +65,8 @@ def process_queue_forever(qname, qcfg, dirs, delay=1.0):
                 try:
                     logging.debug('RUN action: "{}"; {}"'
                                   .format(action_name, rec))
-                    result = action(rec, qname, qcfg=qcfg, dirs=dirs)
+                    #result = action(rec, qname, qcfg=qcfg, dirs=qcfg['dirs'])
+                    result = action(rec, qname)
                     logging.debug('Action passed: "{}"({}) => {}'
                                   .format(action_name, rec, result))
                 except Exception as ex:
@@ -86,7 +93,8 @@ def process_queue_forever(qname, qcfg, dirs, delay=1.0):
                                +' Max allowed is {} so will try again later.'
                                +' Record={}. Exception={}')
                         logging.error(msg.format(action_name,
-                                                 cnt, maxerrors, rec, ex))
+                                                 error_count, maxerrors,
+                                                 rec, ex))
                         # failed: go to the end of the line
                         ru.push_to_active(pl, rid)
                 pl.execute() # execute the pipeline
@@ -146,9 +154,10 @@ def main():
 
     ###########################################################################
 
-    qcfg, dirs = config.get_config(possible_qnames)
-    du.save_pid(sys.argv[0], piddir=dirs['run_dir'])
-    process_queue_forever(args.queue, qcfg, dirs)
+    #!qcfg, dirs = config.get_config(possible_qnames)
+    qcfg = config.get_config()
+    du.save_pid(sys.argv[0], piddir=qcfg['dirs']['run_dir'])
+    process_queue_forever(args.queue, qcfg)
 
 if __name__ == '__main__':
     main()
