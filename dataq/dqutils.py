@@ -17,8 +17,10 @@ def traceback_if_debug():
         logging.debug(''.join(traceback.format_exc()))
 
 
-def save_pid(progpath, piddir='/var/run/dataq'):
+def save_pid(progpath, piddir=None):
     "Write the PID of this process to a file so we can kill it later."
+    piddir='/var/run/dataq' # @@@ Removed name flexibility/complication
+    logging.debug('save_pid: piddir={}'.format(piddir))
     base = os.path.basename(progpath)
     pidfile = os.path.join(piddir, base +'.pid')
 

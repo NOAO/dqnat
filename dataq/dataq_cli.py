@@ -29,6 +29,8 @@ def clear_db(red):
     red.transaction(partial(ru.clear_trans, red=red))
 
 def info(red):
+    qcfg = config.get_config()
+    print('config=',pformat(qcfg))
     pprint.pprint(red.info())
 
 def summary(red):
@@ -330,7 +332,6 @@ def main():
 
     qcfg = config.get_config()
     qname = args.queue
-    print('qcfg=',pformat(qcfg))
     #!max_qsize = qcfg.get('maximum_queue_size',11000)
     #!host = qcfg['dq_host']
     #!port = qcfg['redis_port']

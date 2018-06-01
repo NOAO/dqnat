@@ -75,6 +75,11 @@ def next_record(red):
 def get_record(red, rid):
     return decode_dict(red.hgetall(rid))
 
+def set_record(red, rid, record):
+    red.hmset(rid, record)
+    red.hset(ecnt, rid, 0) # error count against file
+    red.sadd(rids, rid)
+
 def remove_record(red, rid):
     red.srem(rids, rid)
     
@@ -100,6 +105,7 @@ def get_error_count(red, rid):
 def force_save(red):
     prev = red.lastsave()
     red.save()
+    #! red.bgsave() # redis.exceptions.ResponseError: Background save already in progress
     curr= red.lastsave()
     logging.debug('REDIS Saved: {}. (Previously: {}'.format(curr, prev))
     return curr
@@ -132,11 +138,11 @@ def queue_summary(red):
         readPkey=readP,
         ))
 
-def log_queue_summary(red):
+def log_queue_summary(red,msg=''):
     force_save(red)
     dd = queue_summary(red)
     del dd['actionP'], dd['actionPkey'], dd['readP'], dd['readPkey']
-    logging.debug('Q Summary: {}'.format(dd))
+    logging.debug('{}: Q Summary={}'.format(msg,dd))
 
 
 def clear_trans(pl, red=None):
