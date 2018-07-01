@@ -87,36 +87,29 @@ def process_queue_forever(qname, qcfg, delay=1.0):
             logging.error('Error running {} action. error:{}; trace:{}'
                           .format(action_name.upper(), ex, du.trace_str()))
 
-        ru.log_queue_summary(red,'DBG-3')
+        #!ru.log_queue_summary(red,'DBG-3')
         # buffer all commands done by pipeline, make command list atomic
         with red.pipeline() as pl:
             try:
-                logging.debug('DBG-3.1')
                 # switch to normal pipeline mode where commands get buffered
                 pl.multi()
                 if success == False:
-                    logging.debug('DBG-3.1.1')
                     if error_count > maxerrors:
-                        logging.debug('DBG-3.1.1.1')
                         # action kept failing: move to Inactive queue
                         #! ru.push_to_inactive(pl, rid)
                         pass
                     else:
-                        logging.debug('DBG-3.1.1.2')
                         # failed: go to the end of the line
                         ru.push_to_active(pl, rid)
                 pl.execute() # execute the pipeline
-                logging.debug('DBG-3.1.9')
             except Exception as err:
-                logging.debug('DBG-3.2')
                 success = False
                 #!ru.push_to_inactive(pl, rid)
                 logging.error('Unexpected exception; {}; {}'
                               .format(err,du.trace_str()))
                 pl.execute() # execute the pipeline
         # END with pipeline
-        logging.debug('DBG-4')
-        ru.log_queue_summary(red,'DBG-4')
+        #!ru.log_queue_summary(red,'DBG-4')
         if success == True:
             ru.remove_record(red, rid)  # We are done with rid, remove it
             msg = ('Action "{}" ran successfully against ({}): {} => {}')
