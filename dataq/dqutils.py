@@ -59,8 +59,9 @@ def push_to_q(dq_host, dq_port, fname, checksum, timeout=20):
 
         # Receive data from the server and shut down
         received = str(sock.recv(1024), 'utf-8')
-    except:
-        raise
+    except Exception as ex:
+        raise Exception('Could not get data from dq-push server on {};{}'.
+                        format(dq_host, ex))
     finally:
         sock.close()
     # sent successfully 

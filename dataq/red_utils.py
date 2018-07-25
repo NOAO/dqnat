@@ -107,7 +107,7 @@ def force_save(red):
     red.save()
     #! red.bgsave() # redis.exceptions.ResponseError: Background save already in progress
     curr= red.lastsave()
-    logging.debug('REDIS Saved: {}. (Previously: {}'.format(curr, prev))
+    #!logging.debug('REDIS Saved: {}. (Previously: {}'.format(curr, prev))
     return curr
 
 def push_to_active(red, rid):
@@ -204,10 +204,10 @@ def push_records(host, port, records, max_qsize=11000):
         # END: with pipeline
         log_rid(r, checksum, 'end push_records()')
     
-def push_direct(redis_host, redis_port, fname, checksum,
-                max_qsize=11000):
+def push_direct(redis_host, redis_port, fname, checksum, max_qsize=11000):
     'Directly push a record to (possibly remote) REDIS'
-
+    #!logging.debug('DBG-0: push_direct: host={}, port={},fname={}, checksum={}'
+    #!              .format(redis_host, redis_port, fname, checksum))
     r = redis.StrictRedis(host=redis_host, port=redis_port,
                           socket_keepalive=True,
                           retry_on_timeout=True )
