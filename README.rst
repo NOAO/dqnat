@@ -1,6 +1,9 @@
 data-queue
 ==========
 
+Copied from data-queue so that dq and watcher could be combined
+WITHOUT using TADA code (watcher came from tadanat).
+
 Process records of incoming data files, apply various actions on pop,
 be resilient.
 
