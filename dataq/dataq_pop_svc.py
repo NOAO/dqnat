@@ -24,6 +24,7 @@ from . import red_utils as ru
 from .dbvars import *
 #from .actions import *
 
+import django
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'marssite.settings'
 

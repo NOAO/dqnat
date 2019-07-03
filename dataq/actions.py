@@ -1,15 +1,11 @@
 "Actions that can be run against entry when popped off queue."
 import random
 import logging
-import os
+#import os
 from natica.externals import dq_ingest
 #import marssite.marssite.settings
 #marssite.marssite.settings.configure()
 
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'marssite.settings'
-
-django.setup()
 
 def echo30(rec, qname, **kwargs):
     "For diagnostics (fails 30% of the time)"
