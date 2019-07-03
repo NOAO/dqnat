@@ -3,11 +3,7 @@ import random
 import logging
 import os
 from natica.externals import dq_ingest
-import marssite.marssite.settings
-
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'marssite.settings'
-
+#import marssite.marssite.settings
 #marssite.marssite.settings.configure()
 
 
