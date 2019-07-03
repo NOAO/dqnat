@@ -9,27 +9,26 @@ http://fits.gsfc.nasa.gov/fits_verify.html
 import sys
 import argparse
 import logging
-import magic
 from pprint import pprint
-
-import requests
-import astropy.io.fits as pyfits
 import os.path
 from pathlib import PurePath
-#!import datetime as dt
 import subprocess
+# External
+import magic
+import requests
 import yaml
+import astropy.io.fits as pyfits
 from astropy.utils.exceptions import AstropyWarning, AstropyUserWarning
  
 #from . import file_naming as fn
 #!from . import exceptions as tex
 #!from . import hdr_calc_utils as hcu
-from . import scrub
+#!from . import scrub
 #from . import config 
-from . import utils as tut
-from . import tada_settings as ts
-import tada.hdrfunclib.hdr_decorators as hd
-import tada.hdrfunclib.hdr_funcs as hf
+#!from . import utils as tut
+#!from . import tada_settings as ts
+#!import tada.hdrfunclib.hdr_decorators as hd
+#!import tada.hdrfunclib.hdr_funcs as hf
 
 # EXAMPLE compliant header (included here for descriptions):
 """    
@@ -273,12 +272,12 @@ DATASUM = '0         '          /  checksum of data records
 #!    #!'PLQNAME',
 #!    ])
 
-USED_FIELDS = (ts.RAW_REQUIRED_FIELDS
-               | ts.FILENAME_REQUIRED_FIELDS
-               | ts.INGEST_REQUIRED_FIELDS
-               | ts.INGEST_RECOMMENDED_FIELDS
-               | ts.SUPPORT_FIELDS)
-
+#!USED_FIELDS = (ts.RAW_REQUIRED_FIELDS
+#!               | ts.FILENAME_REQUIRED_FIELDS
+#!               | ts.INGEST_REQUIRED_FIELDS
+#!               | ts.INGEST_RECOMMENDED_FIELDS
+#!               | ts.SUPPORT_FIELDS)
+#!
 
 def print_header(msg, hdr=None, fits_filename=None):
     """Provide HDR or FITS_FILENAME"""
@@ -337,29 +336,29 @@ def get_archive_header(fits_file, checksum):
 {hdr}
 """.format(**params)
 
-def missing_in_hdr(hdr, required_fields):
-    hdr_keys = set(hdr.keys())
-    missing = required_fields - hdr_keys
-    return missing
-
-def missing_in_raw_hdr(hdr):
-    """Header from original FITS input to TADA doesn't contain minimum
- acceptable fields."""
-    return missing_in_hdr(hdr, ts.RAW_REQUIRED_FIELDS)
-
-def missing_in_filename_hdr(hdr):
-    """Header from FITS doesn't contain minimum fields acceptable for
- generating standard filename."""
-    return missing_in_hdr(hdr, ts.FILENAME_REQUIRED_FIELDS)
-
-def missing_in_archive_hdr(hdr):
-    """Header from FITS doesn't contain minimum fields acceptable for
- Archive Ingest."""
-    return missing_in_hdr(hdr, ts.INGEST_REQUIRED_FIELDS)
-
-def missing_in_recommended_hdr(hdr):
-    "Header from FITS doesn't contain all fields recommended for ingest."
-    return missing_in_hdr(hdr, ts.INGEST_RECOMMENDED_FIELDS)
+#!def missing_in_hdr(hdr, required_fields):
+#!    hdr_keys = set(hdr.keys())
+#!    missing = required_fields - hdr_keys
+#!    return missing
+#!
+#!def missing_in_raw_hdr(hdr):
+#!    """Header from original FITS input to TADA doesn't contain minimum
+#! acceptable fields."""
+#!    return missing_in_hdr(hdr, ts.RAW_REQUIRED_FIELDS)
+#!
+#!def missing_in_filename_hdr(hdr):
+#!    """Header from FITS doesn't contain minimum fields acceptable for
+#! generating standard filename."""
+#!    return missing_in_hdr(hdr, ts.FILENAME_REQUIRED_FIELDS)
+#!
+#!def missing_in_archive_hdr(hdr):
+#!    """Header from FITS doesn't contain minimum fields acceptable for
+#! Archive Ingest."""
+#!    return missing_in_hdr(hdr, ts.INGEST_REQUIRED_FIELDS)
+#!
+#!def missing_in_recommended_hdr(hdr):
+#!    "Header from FITS doesn't contain all fields recommended for ingest."
+#!    return missing_in_hdr(hdr, ts.INGEST_RECOMMENDED_FIELDS)
 
 #! def valid_header(fits_file):
 #!     """Read FITS metadata and insure it has what we need. 
@@ -450,134 +449,134 @@ given: Telescope, Instrument, Date of observation.
         #raise tex.MarsWebserviceError(response)
         raise Exception(response)
 
-def ws_get_propid(date, telescope, instrument, hdr_pid):
-    """Return propid suitiable for use in DB."""
-    host=ts.natica_host
-    port=ts.natica_port
-    if host == None or port == None:
-        msg = 'Missing MARS host ({}) or port ({}).'.format(host,port)
-        logging.info(msg)
-        #raise tex.MarsWebserviceError(msg)
-        raise Exception(msg)
+#!def ws_get_propid(date, telescope, instrument, hdr_pid):
+#!    """Return propid suitiable for use in DB."""
+#!    host=ts.natica_host
+#!    port=ts.natica_port
+#!    if host == None or port == None:
+#!        msg = 'Missing MARS host ({}) or port ({}).'.format(host,port)
+#!        logging.info(msg)
+#!        #raise tex.MarsWebserviceError(msg)
+#!        raise Exception(msg)
+#!
+#!    # telescope, instrument, date = ('kp4m', 'kosmos', '2016-02-01')
+#!    logging.debug('WS schedule lookup; '
+#!                  'DTCALDAT="{}", DTTELESC="{}", DTINSTRU="{}"'
+#!                  .format(date, telescope, instrument))
+#!    try:
+#!        pid = http_get_propid_for_db(telescope, instrument, date, hdr_pid,
+#!                                     host=host, port=port)
+#!    except Exception as err:
+#!        msg = ('Failed Propid lookup '
+#!               'tele={}, instr={}, date={}, hdrpid={}; {}')\
+#!               .format(telescope, instrument, date, hdr_pid, err)
+#!        logging.info(msg)
+#!        #raise tex.MarsWebserviceError(err)
+#!        raise Exception(err)
+#!    return pid
+#!
+#!def set_dtpropid(orig, **kwargs):
+#!    pid = ws_get_propid(orig.get('DTCALDAT'),
+#!                            orig.get('DTTELESC'),
+#!                            orig.get('DTINSTRU'),
+#!                            orig.get('DTPROPID', orig.get('PROPID', None)))
+#!    return {'DTPROPID': pid}
+#!    
 
-    # telescope, instrument, date = ('kp4m', 'kosmos', '2016-02-01')
-    logging.debug('WS schedule lookup; '
-                  'DTCALDAT="{}", DTTELESC="{}", DTINSTRU="{}"'
-                  .format(date, telescope, instrument))
-    try:
-        pid = http_get_propid_for_db(telescope, instrument, date, hdr_pid,
-                                     host=host, port=port)
-    except Exception as err:
-        msg = ('Failed Propid lookup '
-               'tele={}, instr={}, date={}, hdrpid={}; {}')\
-               .format(telescope, instrument, date, hdr_pid, err)
-        logging.info(msg)
-        #raise tex.MarsWebserviceError(err)
-        raise Exception(err)
-    return pid
-
-def set_dtpropid(orig, **kwargs):
-    pid = ws_get_propid(orig.get('DTCALDAT'),
-                            orig.get('DTTELESC'),
-                            orig.get('DTINSTRU'),
-                            orig.get('DTPROPID', orig.get('PROPID', None)))
-    return {'DTPROPID': pid}
-    
-
-def fix_hdr(hdr, fname, options, opt_params, ignore_schedule=False, **kwargs):
-    '''
-SIDE-EFFECT: Modify hdr dict in place to suit Archive Ingest. 
-Include fields in hdr needed to construct new filename that fullfills standards.
-
-    options :: e.g. {'INSTRUME': 'KOSMOS', 'OBSERVAT': 'KPNO'}
-    '''
-    orig_fullname = opt_params.get('filename',
-                                   hdr.get('DTACQNAM',
-                                           '<no filename option provided>'))
-    logging.debug('fix_hdr; options={}'.format(options))
-    for k,v in options.items():
-        hdr[k] = v
-
-    scrub_errors = scrub.scrub_hdr(hdr)
-    if opt_params.get('VERBOSE', False):
-        if len(scrub_errors) > 0:
-            logging.warning('scrub_errors={}'.format(scrub_errors))
-    #tex.BadFieldContent(scrub_errors)
-
-    # Validate after explicit overrides, before calculated fields.
-    # This is because calc-funcs may depend on required fields.
-    #!validate_raw_hdr(hdr)
-
-    calc_param = opt_params.get('calchdr',None)
-    calc_funcs = []
-    origkws = set(hdr.keys())
-    if calc_param != None:
-        for funcname in calc_param:
-            try:
-                func = eval('hf.'+funcname)
-                #!func = ts.HDR_FUNCS[funcname]
-                calc_funcs.append(func)
-                #!logging.error('hdrfunc use DISABLED')
-            except:
-                raise Exception('Function name "{}" given in option "calchdr"'
-                                ' does not exist in MARSHOST/admin/tada/hdrfunc/'
-                                .format(funcname))
-    logging.error('calc_funcs={}'.format([f.__name__ for f in calc_funcs]))
-    #!for calcfunc in calc_funcs:
-    #!    funcname = calcfunc.__name__
-    #!    try:
-    #!        if not calcfunc.inkws.issubset(origkws):
-    #!            missing = calcfunc.inkws.difference(origkws)
-    #!            msg = ('Some keywords ({}) required (per inkeywords) by HDR'
-    #!                   ' FUNC "{}" are not in the header of file "{}". '
-    #!                   ' SOLUTIONS: Fix FITS, change HDR FUNC inkeywords')
-    #!            raise tex.InvalidHeader(msg.format(', '.join(missing),
-    #!                                               funcname, fname))
-    #!        new = calcfunc(hdr, **kwargs)
-    #!        if not calcfunc.outkws.issubset(new.keys()):
-    #!            missing = calcfunc.outkws.difference(new.keys())
-    #!            msg = ('Some keywords ({}) produced (per outkeywords) by HDR'
-    #!                   ' FUNC "{}" are not in the new header of file "{}". '
-    #!                   ' SOLUTION: Fix HDR FUNC defintion or change'
-    #!                   ' outkeywords')
-    #!            raise tex.InvalidHeader(msg.format(', '.join(missing),
-    #!                                               funcname, fname))
-    #!    except Exception as ex:
-    #!        raise tex.InvalidHeader(
-    #!            'Could not apply hdr_calc_funcs ({}) to {}; {}'
-    #!            .format(funcname, fname, ex))
-    #!    logging.debug('Apply {} to {}; new field values={}'
-    #!                  .format(funcname, fname, new))
-    #!    hdr.update(new)
-    #!    hdr['HISTORY'] = changed_kw_str(funcname, hdr, new, calcfunc.outkws)
-
-    #new = hf.set_dtpropid(hdr, **kwargs)
-    if ignore_schedule:
-        new = {}
-    else:
-        new = set_dtpropid(hdr, **kwargs) # !!! Emitted warning ref orig_fullname
-
-    logging.debug('Updating DTPROPID from {} => {}'
-                  .format(hdr.get('DTPROPID'),
-                          new.get('DTPROPID')))
-    hdr.update(new)
-    
-    if hdr.get('DTPROPID') == 'BADSCRUB' or hdr.get('DTPROPID') == 'NOSCHED': 
-        #raise tex.SubmitException(
-        raise Exception(
-            'Could not create good DTPROPID from PROPID ({}) or from schedule '
-            'lookup for header of: {} (DTPROPID={})'
-            .format(hdr.get('PROPID', 'NA'), orig_fullname,
-                    hdr.get('DTPROPID')))
+#!def fix_hdr(hdr, fname, options, opt_params, ignore_schedule=False, **kwargs):
+#!    '''
+#!SIDE-EFFECT: Modify hdr dict in place to suit Archive Ingest. 
+#!Include fields in hdr needed to construct new filename that fullfills standards.
+#!
+#!    options :: e.g. {'INSTRUME': 'KOSMOS', 'OBSERVAT': 'KPNO'}
+#!    '''
+#!    orig_fullname = opt_params.get('filename',
+#!                                   hdr.get('DTACQNAM',
+#!                                           '<no filename option provided>'))
+#!    logging.debug('fix_hdr; options={}'.format(options))
+#!    for k,v in options.items():
+#!        hdr[k] = v
+#!
+#!    scrub_errors = scrub.scrub_hdr(hdr)
+#!    if opt_params.get('VERBOSE', False):
+#!        if len(scrub_errors) > 0:
+#!            logging.warning('scrub_errors={}'.format(scrub_errors))
+#!    #tex.BadFieldContent(scrub_errors)
+#!
+#!    # Validate after explicit overrides, before calculated fields.
+#!    # This is because calc-funcs may depend on required fields.
+#!    #!validate_raw_hdr(hdr)
+#!
+#!    calc_param = opt_params.get('calchdr',None)
+#!    calc_funcs = []
+#!    origkws = set(hdr.keys())
+#!    if calc_param != None:
+#!        for funcname in calc_param:
+#!            try:
+#!                func = eval('hf.'+funcname)
+#!                #!func = ts.HDR_FUNCS[funcname]
+#!                calc_funcs.append(func)
+#!                #!logging.error('hdrfunc use DISABLED')
+#!            except:
+#!                raise Exception('Function name "{}" given in option "calchdr"'
+#!                                ' does not exist in MARSHOST/admin/tada/hdrfunc/'
+#!                                .format(funcname))
+#!    logging.error('calc_funcs={}'.format([f.__name__ for f in calc_funcs]))
+#!    #!for calcfunc in calc_funcs:
+#!    #!    funcname = calcfunc.__name__
+#!    #!    try:
+#!    #!        if not calcfunc.inkws.issubset(origkws):
+#!    #!            missing = calcfunc.inkws.difference(origkws)
+#!    #!            msg = ('Some keywords ({}) required (per inkeywords) by HDR'
+#!    #!                   ' FUNC "{}" are not in the header of file "{}". '
+#!    #!                   ' SOLUTIONS: Fix FITS, change HDR FUNC inkeywords')
+#!    #!            raise tex.InvalidHeader(msg.format(', '.join(missing),
+#!    #!                                               funcname, fname))
+#!    #!        new = calcfunc(hdr, **kwargs)
+#!    #!        if not calcfunc.outkws.issubset(new.keys()):
+#!    #!            missing = calcfunc.outkws.difference(new.keys())
+#!    #!            msg = ('Some keywords ({}) produced (per outkeywords) by HDR'
+#!    #!                   ' FUNC "{}" are not in the new header of file "{}". '
+#!    #!                   ' SOLUTION: Fix HDR FUNC defintion or change'
+#!    #!                   ' outkeywords')
+#!    #!            raise tex.InvalidHeader(msg.format(', '.join(missing),
+#!    #!                                               funcname, fname))
+#!    #!    except Exception as ex:
+#!    #!        raise tex.InvalidHeader(
+#!    #!            'Could not apply hdr_calc_funcs ({}) to {}; {}'
+#!    #!            .format(funcname, fname, ex))
+#!    #!    logging.debug('Apply {} to {}; new field values={}'
+#!    #!                  .format(funcname, fname, new))
+#!    #!    hdr.update(new)
+#!    #!    hdr['HISTORY'] = changed_kw_str(funcname, hdr, new, calcfunc.outkws)
+#!
+#!    #new = hf.set_dtpropid(hdr, **kwargs)
+#!    if ignore_schedule:
+#!        new = {}
+#!    else:
+#!        new = set_dtpropid(hdr, **kwargs) # !!! Emitted warning ref orig_fullname
+#!
+#!    logging.debug('Updating DTPROPID from {} => {}'
+#!                  .format(hdr.get('DTPROPID'),
+#!                          new.get('DTPROPID')))
+#!    hdr.update(new)
+#!    
+#!    if hdr.get('DTPROPID') == 'BADSCRUB' or hdr.get('DTPROPID') == 'NOSCHED': 
+#!        #raise tex.SubmitException(
+#!        raise Exception(
+#!            'Could not create good DTPROPID from PROPID ({}) or from schedule '
+#!            'lookup for header of: {} (DTPROPID={})'
+#!            .format(hdr.get('PROPID', 'NA'), orig_fullname,
+#!                    hdr.get('DTPROPID')))
         
 
-def show_hdr_values(msg, hdr):
-    """Show the values for 'interesting' header fields"""
-    #!for key in RAW_REQUIRED_FIELDS.union(INGEST_REQUIRED_FIELDS):
-    print('{}: '.format(msg), end='')
-    for key in ts.RAW_REQUIRED_FIELDS:
-        print('{}="{}"'.format(key,hdr.get(key,'<not given>')),end=', ')
-    print()
+#!def show_hdr_values(msg, hdr):
+#!    """Show the values for 'interesting' header fields"""
+#!    #!for key in RAW_REQUIRED_FIELDS.union(INGEST_REQUIRED_FIELDS):
+#!    print('{}: '.format(msg), end='')
+#!    for key in ts.RAW_REQUIRED_FIELDS:
+#!        print('{}="{}"'.format(key,hdr.get(key,'<not given>')),end=', ')
+#!    print()
 
 def get_options_dict(fits_filename):
     if os.path.exists(fits_filename + '.yaml'):
@@ -657,27 +656,27 @@ def txt_to_hdr(ffile):
                 hdr[kstr.strip()] = vstr.strip()
     return hdr
 
-def get_hdr_as_dict(fitsfile):
-    #!hdict = dict()
-    #!for hdu in pyfits.open(fitsfile):
-    #!    hdict.update(dict(hdu.header))
-
-    hdict = dict()
-    hdulist = pyfits.open(fitsfile)
-    for field in (USED_FIELDS | hd.all_in_keywords | hd.all_out_keywords):
-        if field in hdulist[0].header:
-            # use existing Primary HDU field
-            hdict[field] = hdulist[0].header[field]
-        else:
-            # use last existing Extension HDU field
-            for hdu in hdulist[1:]:
-                if field in hdu.header:
-                    hdict[field] = hdu.header[field]
-
-    modified_keys = sorted(list(hdict.keys()))
-    hdict['COMMENT'] = 'MODIFIED:{}'.format(','.join(modified_keys))
-    return hdict
-
+#!def get_hdr_as_dict(fitsfile):
+#!    #!hdict = dict()
+#!    #!for hdu in pyfits.open(fitsfile):
+#!    #!    hdict.update(dict(hdu.header))
+#!
+#!    hdict = dict()
+#!    hdulist = pyfits.open(fitsfile)
+#!    for field in (USED_FIELDS | hd.all_in_keywords | hd.all_out_keywords):
+#!        if field in hdulist[0].header:
+#!            # use existing Primary HDU field
+#!            hdict[field] = hdulist[0].header[field]
+#!        else:
+#!            # use last existing Extension HDU field
+#!            for hdu in hdulist[1:]:
+#!                if field in hdu.header:
+#!                    hdict[field] = hdu.header[field]
+#!
+#!    modified_keys = sorted(list(hdict.keys()))
+#!    hdict['COMMENT'] = 'MODIFIED:{}'.format(','.join(modified_keys))
+#!    return hdict
+#!
 
 #!FLOAT_FIELDS =  [#'BSCALE', 'BZERO',
 #!    'DATAMAX', 'DATAMIN',
@@ -716,27 +715,27 @@ def is_floatingpoint(fitsfile):
 #  OBSGEO-Za, OBSGEO-Ya, OBSGEO-Za,
 #  RESTFRQa, RESTWAVa,
 #  VELANGLa, VELOSYSa, ZSOURCEa
-def scrub_fits(fitsfname):
-    """Fix some violations against FITS standard (3.0) IN PLACE."""
-
-    hdulist = pyfits.open(fitsfname, mode='update')
-    for hdu in hdulist:
-        # Remove any fields defined by standard as FLOAT whos value is NOT float.
-        for kw in ts.FLOAT_FIELDS:
-            hdr = hdu.header
-            if (kw in hdr) and (type(hdr[kw]) is str):
-                try:
-                    ff = float(hdr(kw))
-                except:
-                    msg = ('Removed "{}" since its value ("{}") was a string'
-                       .format(kw, hdr[kw]))
-                    hdr['HISTORY'] = msg
-                    del hdr[kw]
-                    logging.warning('Invalid FITS file "{}": {}'
-                                    .format(fitsfname, msg))
-                else:
-                    hdr = ff
-    hdulist.close(output_verify='fix')
+#!def scrub_fits(fitsfname):
+#!    """Fix some violations against FITS standard (3.0) IN PLACE."""
+#!
+#!    hdulist = pyfits.open(fitsfname, mode='update')
+#!    for hdu in hdulist:
+#!        # Remove any fields defined by standard as FLOAT whos value is NOT float.
+#!        for kw in ts.FLOAT_FIELDS:
+#!            hdr = hdu.header
+#!            if (kw in hdr) and (type(hdr[kw]) is str):
+#!                try:
+#!                    ff = float(hdr(kw))
+#!                except:
+#!                    msg = ('Removed "{}" since its value ("{}") was a string'
+#!                       .format(kw, hdr[kw]))
+#!                    hdr['HISTORY'] = msg
+#!                    del hdr[kw]
+#!                    logging.warning('Invalid FITS file "{}": {}'
+#!                                    .format(fitsfname, msg))
+#!                else:
+#!                    hdr = ff
+#!    hdulist.close(output_verify='fix')
 
 # EXAMPLE:
 #   find /data/raw -name "*.fits*" -print0 | xargs --null  fits_compliant
