@@ -16,12 +16,8 @@ import hashlib
 import socket
 
 
-from . import audit
-from . import fits_utils as fu
-from . import utils as tut
-from . import exceptions as tex
+import fits.fits_utils as fu
 import dataq.red_utils as ru
-
 
 import yaml
 import watchdog.events
@@ -31,7 +27,6 @@ import watchdog.observers
 from . import fpack as fp
 
 from . import tada_settings as ts
-auditor = audit.Auditor()
 
 ##############################################################################
 ### Monitor
@@ -50,21 +45,21 @@ auditor = audit.Auditor()
 #!            hash_md5.update(chunk)
 #!    return hash_md5.hexdigest()
 
-def validate_personality(pdict):
-    if 'params' not in pdict:
-        raise tex.InvalidPersonality('Missing "params" in {}'
-                                     .format(pdict))
-    if 'md5sum' not in pdict['params']:
-        raise tex.InvalidPersonality('Missing "params.md5sum" in {}'
-                                     .format(pdict))
-    if 'filename' not in pdict['params']:
-        raise tex.InvalidPersonality('Missing "params.filename" in {}'
-                                     .format(pdict))
-    if 'options' not in pdict:
-        raise tex.InvalidPersonality('Missing "options" in {}'
-                                     .format(pdict))
-
-    return True
+#!def validate_personality(pdict):
+#!    if 'params' not in pdict:
+#!        raise tex.InvalidPersonality('Missing "params" in {}'
+#!                                     .format(pdict))
+#!    if 'md5sum' not in pdict['params']:
+#!        raise tex.InvalidPersonality('Missing "params.md5sum" in {}'
+#!                                     .format(pdict))
+#!    if 'filename' not in pdict['params']:
+#!        raise tex.InvalidPersonality('Missing "params.filename" in {}'
+#!                                     .format(pdict))
+#!    if 'options' not in pdict:
+#!        raise tex.InvalidPersonality('Missing "options" in {}'
+#!                                     .format(pdict))
+#!
+#!    return True
 
 #class PushEventHandler(watchdog.events.FileSystemEventHandler):
 class PushEventHandler(watchdog.events.PatternMatchingEventHandler):
@@ -149,7 +144,7 @@ YAML file will be transfered with FITS because its in same directory..
         except Exception as ex:
             logging.error('Failed valid_dir({}); {}'
                           .format(ifname, ex))
-            tut.log_traceback()
+            #tut.log_traceback()
             return False
             
         return True
@@ -174,14 +169,12 @@ YAML file will be transfered with FITS because its in same directory..
         except Exception as ex:
             logging.error('Failed to get options_from_yamls({}); {}'
                           .format(ifname, ex))
-            tut.log_traceback()
+            #tut.log_traceback()
             return None
 
         logging.debug('Got pdict from yamls:{}'.format(pdict))
         md5sum = pdict['params']['md5sum']
         try:
-            #!auditor.set_fstop(pdict.get('md5sum',os.path.basename(ifname)),
-            auditor.set_fstop(md5sum, 'watch', host=socket.getfqdn())
             cachename = ifname.replace(self.dropdir, self.cachedir)
             os.makedirs(os.path.dirname(cachename), exist_ok=True)
             queuename = cachename.replace('/cache/','/cache/.queue/')
@@ -222,13 +215,13 @@ YAML file will be transfered with FITS because its in same directory..
             except Exception as ex:
                 # Push to dataq failed (file not put into TADA processing)
                 logging.error('Push FAILED with {}; {}'.format(ifname, ex))
-                tut.log_traceback()
+                #tut.log_traceback()
                 shutil.move(cachename, anticachename)
         except Exception as ex:
             # Something unexpected failed (makedirs, copy, yaml read/write)
             logging.error('PushEventHandler.new_file FAILED with {}; {}'
                           .format(ifname, ex))
-            tut.log_traceback()
+            #tut.log_traceback()
 
     def options_from_yamls(self, ifname):
         """Returned combined options and parameters as single dict formed by 
@@ -248,7 +241,8 @@ YAML file will be transfered with FITS because its in same directory..
         globpattern = os.path.join(self.personalitydir, inst, '*.yaml')
         yfiles1 = glob(globpattern)
         if len(yfiles1) == 0:
-            raise tex.NoPersonality(
+            #raise tex.NoPersonality(
+            raise Exception(
                 "Did not find expected YAML personality file(s) in: {}"
                 .format(globpattern))
         for yfile in sorted(yfiles1):

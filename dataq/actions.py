@@ -1,7 +1,10 @@
 "Actions that can be run against entry when popped off queue."
 import random
 import logging
-import tada.actions
+from natica.externals import dq_ingest
+import marssite.marssite.settings
+
+marssite.marssite.settings.configure()
 
 def echo30(rec, qname, **kwargs):
     "For diagnostics (fails 30% of the time)"
@@ -13,6 +16,5 @@ def echo30(rec, qname, **kwargs):
 
 action_lut = dict(
     echo30=echo30, # sample. Not used for production.
-    network_move=tada.actions.network_move,
-    submit=tada.actions.submit,
+    submit=dq_ingest,
     )
