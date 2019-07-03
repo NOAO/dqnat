@@ -24,6 +24,9 @@ from . import red_utils as ru
 from .dbvars import *
 from .actions import *
 
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'marssite.settings'
+
 msghi = ('Failed to run action "{}" {} times. '
                    +' Max allowed is {} so moving it to the'
                    +' INACTIVE queue. Record={}.')
