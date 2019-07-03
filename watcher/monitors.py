@@ -14,19 +14,15 @@ import subprocess
 import re
 import hashlib
 import socket
-
-
-import fits.fits_utils as fu
-import dataq.red_utils as ru
-
+# External
 import yaml
 import watchdog.events
 import watchdog.observers
-
-#from . import submit as ts
-from . import fpack as fp
-
-from . import tada_settings as ts
+# Local
+#! from . import tada_settings as ts
+import fits.fits_utils as fu
+import fits.fpack as fp
+import dataq.red_utils as ru
 
 ##############################################################################
 ### Monitor
@@ -84,14 +80,15 @@ YAML file will be transfered with FITS because its in same directory..
 
     def pushfile(self, md5sum, fullfname):
         logging.debug('Monitor: pushfile({})'.format(fullfname))
+        rport = yaml.load(open('/etc/tada/tada.conf')).get('redis_port','6379')
         try:
             #!cmdstr = ('dqcli --pushfile "{}"'.format(fullfname))
             #!logging.debug('EXECUTING: {}'.format(cmdstr))
             #!subprocess.check_call(cmdstr, shell=True)
             logging.debug('EXECUTING: push_direct; redis_port="{}"'
-                          .format(ts.redis_port))
+                          .format(rport))
             ru.push_direct(socket.getfqdn(), # this host
-                           ts.redis_port, #qcfg['redis_port'],
+                           rport, #qcfg['redis_port'],
                            fullfname,
                            md5sum)
         except Exception as err:
