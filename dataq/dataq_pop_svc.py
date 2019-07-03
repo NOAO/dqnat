@@ -22,7 +22,7 @@ from . import config
 from . import dqutils as du
 from . import red_utils as ru
 from .dbvars import *
-#from .actions import *
+from .actions import *
 
 import django
 import os
