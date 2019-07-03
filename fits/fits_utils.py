@@ -22,7 +22,7 @@ import yaml
 from astropy.utils.exceptions import AstropyWarning, AstropyUserWarning
  
 #from . import file_naming as fn
-from . import exceptions as tex
+#!from . import exceptions as tex
 #!from . import hdr_calc_utils as hcu
 from . import scrub
 #from . import config 
@@ -388,7 +388,8 @@ def validate_raw_hdr(hdr, orig_fullname):
         msg = ('Raw FITS header is missing required metadata fields ({}) '
                'in file {}').format(', '.join(sorted(missing)), orig_fullname)
         #raise tex.IngestRejection(orig_fullname, msg, hdr)
-        raise tex.InvalidHeader(msg)
+        #!raise tex.InvalidHeader(msg)
+        raise Exception(msg)
     return True    
 
 def validate_cooked_hdr(hdr, orig_fullname):
@@ -397,7 +398,8 @@ def validate_cooked_hdr(hdr, orig_fullname):
         msg = ('Modified FITS header is missing required metadata fields ({}) '
                'in file {}').format(', '.join(sorted(missing)), orig_fullname)
         #raise tex.IngestRejection(orig_fullname, msg, hdr)
-        raise tex.InvalidHeader(msg)
+        #raise tex.InvalidHeader(msg)
+        raise Exception(msg)
     return True
 
 def validate_recommended_hdr(hdr, orig_fullname):
@@ -417,7 +419,9 @@ def fitsverify(fname):
         subprocess.check_output(cmd)
     except Exception as err:
         #!raise tex.InvalidFits('Verify failed: {}'.format(' '.join(cmd)))
-        raise tex.InvalidFits('Verify failed: /usr/local/bin/fitsverify -e -q {}'
+        #!raise tex.InvalidFits('Verify failed: /usr/local/bin/fitsverify -e -q {}'
+        #!                      .format(os.path.basename(fname)))
+        raise Exception('Verify failed: /usr/local/bin/fitsverify -e -q {}'
                               .format(os.path.basename(fname)))
     logging.debug('{} PASSED fitsverify()'.format(fname))
     return True
@@ -443,7 +447,8 @@ given: Telescope, Instrument, Date of observation.
         msg = ('{}:MARS svc={}; {}.'
                .format(r.status_code, url.replace(host,'mars.host'), response))
         logging.info(msg)
-        raise tex.MarsWebserviceError(response)
+        #raise tex.MarsWebserviceError(response)
+        raise Exception(response)
 
 def ws_get_propid(date, telescope, instrument, hdr_pid):
     """Return propid suitiable for use in DB."""
@@ -452,7 +457,8 @@ def ws_get_propid(date, telescope, instrument, hdr_pid):
     if host == None or port == None:
         msg = 'Missing MARS host ({}) or port ({}).'.format(host,port)
         logging.info(msg)
-        raise tex.MarsWebserviceError(msg)
+        #raise tex.MarsWebserviceError(msg)
+        raise Exception(msg)
 
     # telescope, instrument, date = ('kp4m', 'kosmos', '2016-02-01')
     logging.debug('WS schedule lookup; '
@@ -466,7 +472,8 @@ def ws_get_propid(date, telescope, instrument, hdr_pid):
                'tele={}, instr={}, date={}, hdrpid={}; {}')\
                .format(telescope, instrument, date, hdr_pid, err)
         logging.info(msg)
-        raise tex.MarsWebserviceError(err)
+        #raise tex.MarsWebserviceError(err)
+        raise Exception(err)
     return pid
 
 def set_dtpropid(orig, **kwargs):
@@ -556,7 +563,8 @@ Include fields in hdr needed to construct new filename that fullfills standards.
     hdr.update(new)
     
     if hdr.get('DTPROPID') == 'BADSCRUB' or hdr.get('DTPROPID') == 'NOSCHED': 
-        raise tex.SubmitException(
+        #raise tex.SubmitException(
+        raise Exception(
             'Could not create good DTPROPID from PROPID ({}) or from schedule '
             'lookup for header of: {} (DTPROPID={})'
             .format(hdr.get('PROPID', 'NA'), orig_fullname,
