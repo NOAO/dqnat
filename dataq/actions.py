@@ -6,6 +6,11 @@ from natica.externals import dq_ingest
 #import marssite.marssite.settings
 #marssite.marssite.settings.configure()
 
+import django
+from  django.conf import settings
+settings.configure()
+django.setup()
+
 
 def echo30(rec, qname, **kwargs):
     "For diagnostics (fails 30% of the time)"
