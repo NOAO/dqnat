@@ -25,10 +25,9 @@ from .dbvars import *
 from .actions import *
 
 import django
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'marssite.settings'
+import django
+from  django.conf import settings
 
-django.setup()
 
 msghi = ('Failed to run action "{}" {} times. '
                    +' Max allowed is {} so moving it to the'
@@ -172,6 +171,9 @@ def main():
     #!qcfg, dirs = config.get_config(possible_qnames)
     qcfg = config.get_config()
     #!du.save_pid(sys.argv[0], piddir=qcfg['dirs']['run_dir'])
+    settings.configure()
+    django.setup()
+
     process_queue_forever(args.queue, qcfg)
 
 if __name__ == '__main__':
