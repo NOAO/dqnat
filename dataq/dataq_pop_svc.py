@@ -9,6 +9,7 @@ put record back on queue.
 
 
 import argparse
+import os
 import logging
 import logging.config
 import json
@@ -38,7 +39,8 @@ msglo = ('Failed to run action "{}" {} times. '
 # GROSS: highly nested code!!!
 #!def process_queue_forever(qname, qcfg, dirs, delay=1.0):
 def process_queue_forever(qname, qcfg, delay=1.0):
-    settings.configure()
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'marssite.settings'
+    #settings.configure()
     django.setup()
     from natica.externals import dq_ingest
     
