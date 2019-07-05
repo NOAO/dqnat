@@ -16,11 +16,11 @@ from functools import partial
 from pprint import pformat
 
 #!from tada import config
-from . import config
-from . import dqutils
-from . import red_utils as ru
-from .dbvars import *
-from .loggingCfg import *
+from dataq import config
+from dataq import dqutils
+from dataq import red_utils as ru
+from dataq.dbvars import *
+from dataq.loggingCfg import *
 
     
 def clear_db(red):

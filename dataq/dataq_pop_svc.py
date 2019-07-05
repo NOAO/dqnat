@@ -18,10 +18,10 @@ import traceback
 import yaml
 
 #!from tada import config
-from . import config
-from . import dqutils as du
-from . import red_utils as ru
-from .dbvars import *
+import dataq.dqutils as du
+import dataq.red_utils as ru
+from dataq import config
+from dataq.dbvars import *
 #!from .actions import *
 
 import django
