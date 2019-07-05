@@ -2,7 +2,7 @@
 import random
 import logging
 #import os
-from natica.externals import dq_ingest
+#from natica.externals import dq_ingest
 #import marssite.marssite.settings
 #marssite.marssite.settings.configure()
 
