@@ -90,6 +90,7 @@ setup(
             'dqcli=dataq.dataq_cli:main',
             'dqsvcpush=dataq.dataq_push_svc:main',
             'dqsvcpop=dataq.dataq_pop_svc:main',
+            'watch_drops=watcher.watch_drops:main',
             #!'file_type=dataq.file_type:main',
         ],
     },
