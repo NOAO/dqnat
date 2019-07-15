@@ -63,7 +63,7 @@ def validate_config(cfg, fname=None, qnames=None):
             'Config in {} is missing required queues {}. Required {}.'
             .format(fname, ', '.join(missingqs), ', '.join(qnames) ))
 
-def get_config(configfile='/etc/tada/dq-config.json'):
+def get_config(configfile='/etc/mars/dq-config.json'):
     with open(configfile) as f:
         dqcfg = json.load(f)
 #!    with open(schemafile) as f:  #@@@ schema for DQ config

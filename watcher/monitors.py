@@ -41,21 +41,33 @@ import dataq.red_utils as ru
 #!            hash_md5.update(chunk)
 #!    return hash_md5.hexdigest()
 
-#!def validate_personality(pdict):
-#!    if 'params' not in pdict:
-#!        raise tex.InvalidPersonality('Missing "params" in {}'
-#!                                     .format(pdict))
-#!    if 'md5sum' not in pdict['params']:
-#!        raise tex.InvalidPersonality('Missing "params.md5sum" in {}'
-#!                                     .format(pdict))
-#!    if 'filename' not in pdict['params']:
-#!        raise tex.InvalidPersonality('Missing "params.filename" in {}'
-#!                                     .format(pdict))
-#!    if 'options' not in pdict:
-#!        raise tex.InvalidPersonality('Missing "options" in {}'
-#!                                     .format(pdict))
-#!
-#!    return True
+def validate_personality(pdict):
+    if 'params' not in pdict:
+        raise tex.InvalidPersonality('Missing "params" in {}'
+                                     .format(pdict))
+    if 'md5sum' not in pdict['params']:
+        raise tex.InvalidPersonality('Missing "params.md5sum" in {}'
+                                     .format(pdict))
+    if 'filename' not in pdict['params']:
+        raise tex.InvalidPersonality('Missing "params.filename" in {}'
+                                     .format(pdict))
+    if 'options' not in pdict:
+        raise tex.InvalidPersonality('Missing "options" in {}'
+                                     .format(pdict))
+
+    return True
+
+
+def read_hiera_yaml():
+    yamlfile = '/etc/mars/hiera_settings.yaml'
+    try:
+        with open(yamlfile) as f:
+            res = yaml.safe_load(f)
+    except Exception as err:
+        logging.error('Could not read YAML file {}; {}'
+                      .format(yamlfile, err))
+        raise
+    return res
 
 #class PushEventHandler(watchdog.events.FileSystemEventHandler):
 class PushEventHandler(watchdog.events.PatternMatchingEventHandler):
@@ -75,12 +87,12 @@ YAML file will be transfered with FITS because its in same directory..
         self.date_re=re.compile(r"^20\d{6}$")
         logging.info('init PushEventHandler({}, {})'
                      .format(drop_dir, status_dir))
-        #super(watchdog.events.FileSystemEventHandler).__init__()
         super().__init__(patterns=self.patterns)
 
     def pushfile(self, md5sum, fullfname):
         logging.debug('Monitor: pushfile({})'.format(fullfname))
-        rport = yaml.load(open('/etc/tada/tada.conf')).get('redis_port','6379')
+        #rport = yaml.load(open('/etc/tada/tada.conf')).get('redis_port','6379')
+        rport = read_hiera_yaml().get('redis_port')
         try:
             #!cmdstr = ('dqcli --pushfile "{}"'.format(fullfname))
             #!logging.debug('EXECUTING: {}'.format(cmdstr))
@@ -222,31 +234,30 @@ YAML file will be transfered with FITS because its in same directory..
 
     def options_from_yamls(self, ifname):
         """Returned combined options and parameters as single dict formed by 
-    collecting YAML files. Three locations will be looked in for YAML files:
-      1. <personality_dir>/<instrument>/*.yaml  (can be multiple)
-      2. <dropbox/<instrument>/*.yaml           (can be multiple)
-      3. <ifname>.yaml                          (just one)
+    collecting YAML files. Two locations will be looked in for YAML files:
+      1. <dropbox/<instrument>/*.yaml           (can be multiple)
+      1. <ifname>.yaml                          (just one)
      """
-        #logging.debug('DBG: options_from_yamls:{}'.format(ifname))
+        logging.debug('DBG: options_from_yamls:{}'.format(ifname))
         day,inst,*d = PurePath(ifname).relative_to(PurePath(self.dropdir)).parts
-        #logging.debug('DBG: file={}, day={}, inst={}'.format(ifname, day, inst))
+        logging.debug('DBG: file={}, day={}, inst={}'.format(ifname, day, inst))
 
         pdict = dict(options={}, params={})
         #pdict['params']['filename'] = ifname # default 
 
-        # from PERSONALITYDIR
-        globpattern = os.path.join(self.personalitydir, inst, '*.yaml')
-        yfiles1 = glob(globpattern)
-        if len(yfiles1) == 0:
-            #raise tex.NoPersonality(
-            raise Exception(
-                "Did not find expected YAML personality file(s) in: {}"
-                .format(globpattern))
-        for yfile in sorted(yfiles1):
-            with open(yfile) as yy:
-                yd = yaml.safe_load(yy)
-                pdict['params'].update(yd.get('params', {}))
-                pdict['options'].update(yd.get('options', {}))
+        #!# from PERSONALITYDIR
+        #!globpattern = os.path.join(self.personalitydir, inst, '*.yaml')
+        #!yfiles1 = glob(globpattern)
+        #!if len(yfiles1) == 0:
+        #!    #raise tex.NoPersonality(
+        #!    raise Exception(
+        #!        "Did not find expected YAML personality file(s) in: {}"
+        #!        .format(globpattern))
+        #!for yfile in sorted(yfiles1):
+        #!    with open(yfile) as yy:
+        #!        yd = yaml.safe_load(yy)
+        #!        pdict['params'].update(yd.get('params', {}))
+        #!        pdict['options'].update(yd.get('options', {}))
 
         # from DROPDIR
         globpattern = os.path.join(self.dropdir, inst, '*.yaml')
@@ -266,7 +277,7 @@ YAML file will be transfered with FITS because its in same directory..
                 pdict['options'].update(yd.get('options', {}))
 
         logging.debug('DBG: read YAML files: {}'
-                      .format(yfiles1 + yfiles2 + [yfile]))
+                      .format(yfiles2 + [yfile]))
         logging.debug('DBG: pdict={}'.format(pdict))
         validate_personality(pdict)
         return pdict 
