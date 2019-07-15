@@ -49,7 +49,7 @@ def process_queue_forever(qname, qcfg, delay=1.0):
     #!action_name = qcfg['queues'][qname]['action_name']
     #!action = action_lut[action_name]
     action = dq_ingest
-    action_name = dg_ingest.__name__
+    action_name = dq_ingest.__name__
     #maxerrors = qcfg['queues'][qname]['maximum_errors_per_record']
     maxerrors = 0 #@@@ ignore config value
 
