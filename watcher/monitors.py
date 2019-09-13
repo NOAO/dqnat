@@ -105,6 +105,7 @@ YAML file will be transfered with FITS because its in same directory..
                            md5sum)
         except Exception as err:
             logging.error('Could not push file. {}'.format(err))
+            raise
 
     def on_created(self, event):
         if isinstance(event, watchdog.events.DirCreatedEvent):
