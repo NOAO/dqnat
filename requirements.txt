@@ -4,5 +4,5 @@
 watchdog==2.3.1
 #redis==2.10.5
 #redis==3.2.1
-redis==4.5.1
+redis==4.5.3
 python-magic==0.4.6
